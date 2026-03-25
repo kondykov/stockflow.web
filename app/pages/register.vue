@@ -1,60 +1,87 @@
 ﻿<script setup lang="ts">
 import { z } from 'zod'
-import type { FormSubmitEvent } from '#ui/types'
 
 definePageMeta({
-  middleware: 'guest'
+  layout: 'auth'
+})
+
+useSeoMeta({
+  title: 'Регистрация',
+  description: 'Создайте аккаунт в StockFlow ERP'
 })
 
 const toast = useToast()
 const pending = ref(false)
-const form = ref()
+
+const fields = [
+  {
+    name: 'name',
+    type: 'text' as const,
+    label: 'Имя',
+    placeholder: 'Иван Иванов'
+  },
+  {
+    name: 'email',
+    type: 'text' as const,
+    label: 'Email',
+    placeholder: 'mail@example.com'
+  },
+  {
+    name: 'password',
+    type: 'password' as const,
+    label: 'Пароль',
+    placeholder: 'Введите пароль'
+  },
+  {
+    name: 'passwordConfirmation',
+    type: 'password' as const,
+    label: 'Подтверждение пароля',
+    placeholder: 'Повторите пароль'
+  }
+]
 
 const schema = z.object({
   name: z.string().min(2, 'Введите ваше имя'),
   email: z.string().email('Некорректный email'),
   password: z.string().min(8, 'Пароль должен быть не менее 8 символов'),
   passwordConfirmation: z.string()
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Пароли не совпадают",
-  path: ["passwordConfirmation"]
+}).refine((s) => s.password === s.passwordConfirmation, {
+  message: 'Пароли не совпадают',
+  path: ['passwordConfirmation']
 })
 
-const state = reactive({
-  name: '',
-  email: '',
-  password: '',
-  passwordConfirmation: ''
-})
+type Schema = z.output<typeof schema>
 
-async function onSubmit(event: FormSubmitEvent<z.output<typeof schema>>) {
+async function onSubmit(event: Schema) {
   if (pending.value) return
   pending.value = true
 
+  console.log(event.data)
+
   try {
-    const response = await $fetch<any>('/api/identity/register', {
+    const response = await $fetch('/api/identity/register', {
       method: 'POST',
-      body: {
-        name: state.name,
-        email: state.email,
-        password: state.password,
-        passwordConfirmation: state.passwordConfirmation
-      }
+      body: event.data
     })
 
     if (response.successful) {
-      toast.add({ title: 'Аккаунт создан!', description: 'Теперь вы можете войти', color: 'success' })
+      toast.add({
+        title: 'Аккаунт создан!',
+        description: 'Теперь вы можете войти',
+        color: 'success'
+      })
+
       return navigateTo('/login')
     }
   } catch (err: any) {
     const data = err.data
 
     if (err.statusCode === 422 && data?.errors) {
-      const serverErrors = data.errors.map((e: any) => ({
-        path: e.property,
-        message: e.message
-      }))
-      form.value.setErrors(serverErrors)
+      toast.add({
+        title: 'Ошибка',
+        description: data.errors[0]?.message || 'Некорректные данные',
+        color: 'error'
+      })
     } else {
       toast.add({
         title: 'Ошибка регистрации',
@@ -69,40 +96,19 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof schema>>) {
 </script>
 
 <template>
-  <UContainer class="flex items-center justify-center min-h-[calc(100vh-200px)]">
-    <UCard class="w-full max-w-sm">
-      <template #header>
-        <div class="text-center">
-          <h2 class="text-2xl font-bold">Создать аккаунт</h2>
-          <p class="text-sm text-muted">Присоединяйтесь к StockFlow ERP</p>
-        </div>
-      </template>
-
-      <UForm ref="form" :schema="schema" :state="state" @submit="onSubmit" class="space-y-4">
-        <UFormField label="Имя" name="name">
-          <UInput v-model="state.name" placeholder="Иван Иванов" icon="i-heroicons-user" class="w-full" />
-        </UFormField>
-
-        <UFormField label="Email" name="email">
-          <UInput v-model="state.email" placeholder="mail@example.com" icon="i-heroicons-envelope" class="w-full" />
-        </UFormField>
-
-        <UFormField label="Пароль" name="password">
-          <UInput v-model="state.password" type="password" icon="i-heroicons-lock-closed" class="w-full" />
-        </UFormField>
-
-        <UFormField label="Подтверждение пароля" name="passwordConfirmation">
-          <UInput v-model="state.passwordConfirmation" type="password" icon="i-heroicons-check-badge" class="w-full" />
-        </UFormField>
-
-        <UButton type="submit" block :loading="pending">Зарегистрироваться</UButton>
-      </UForm>
-
-      <template #footer>
-        <p class="text-xs text-center text-muted">
-          Уже есть аккаунт? <NuxtLink to="/login" class="text-primary font-medium">Войти</NuxtLink>
-        </p>
-      </template>
-    </UCard>
-  </UContainer>
+  <UAuthForm
+    :fields="fields"
+    :schema="schema"
+    title="Создать аккаунт"
+    :submit="{ label: 'Зарегистрироваться', loading: pending }"
+    @submit="onSubmit"
+  >
+    <template #description>
+      Уже есть аккаунт?
+      <ULink to="/login" class="text-primary font-medium">
+        Войти
+      </ULink>
+      .
+    </template>
+  </UAuthForm>
 </template>

@@ -1,82 +1,123 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'authenticated'
+  middleware: 'authenticated',
+  layout: 'default'
 })
+
+useSeoMeta({
+  title: 'Панель управления',
+  description: 'Управление складской системой StockFlow ERP'
+})
+
+const modules = [
+  {
+    label: 'Товары',
+    description: 'Каталог товаров, SKU, карточки',
+    icon: 'i-lucide-box',
+    to: '/products',
+    status: 'active'
+  },
+  {
+    label: 'Склады',
+    description: 'Список складов и их параметры',
+    icon: 'i-lucide-warehouse',
+    to: '/warehouses',
+    status: 'active'
+  },
+  {
+    label: 'Запасы',
+    description: 'Остатки, партии, серийные номера',
+    icon: 'i-lucide-layers',
+    to: '/stock',
+    status: 'active'
+  },
+  {
+    label: 'Перемещения',
+    description: 'Внутренние перемещения между складами',
+    icon: 'i-lucide-arrow-left-right',
+    to: '/transfers',
+    status: 'soon'
+  },
+  {
+    label: 'Поставки',
+    description: 'Приёмка товаров от поставщиков',
+    icon: 'i-lucide-truck',
+    to: '/supplies',
+    status: 'soon'
+  },
+  {
+    label: 'Отгрузки',
+    description: 'Отправка товаров клиентам',
+    icon: 'i-lucide-package-check',
+    to: '/shipments',
+    status: 'disabled'
+  }
+]
 </script>
 
 <template>
   <div>
     <UPageHero
-      title="Nuxt Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
-      :links="[{
-        label: 'Get started',
-        to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-        target: '_blank',
-        trailingIcon: 'i-lucide-arrow-right',
-        size: 'xl'
-      }, {
-        label: 'Use this template',
-        to: 'https://github.com/nuxt-ui-templates/starter',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        size: 'xl',
-        color: 'neutral',
-        variant: 'subtle'
-      }]"
+      title="StockFlow ERP"
+      description="Управляйте товарами, складами, запасами и логистикой в единой системе. Простая, быстрая и удобная ERP для малого и среднего бизнеса."
+      :links="[
+        {
+          label: 'Перейти к складам',
+          to: '/warehouses',
+          trailingIcon: 'i-lucide-arrow-right',
+          size: 'xl'
+        },
+        {
+          label: 'Документация',
+          to: '/docs',
+          icon: 'i-lucide-book-open',
+          size: 'xl',
+          color: 'neutral',
+          variant: 'subtle'
+        }
+      ]"
     />
 
     <UPageSection
-      id="features"
-      title="Everything you need to build modern Nuxt apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
-      :features="[{
-        icon: 'i-lucide-rocket',
-        title: 'Production-ready from day one',
-        description: 'Pre-configured with TypeScript, ESLint, Tailwind CSS, and all the best practices. Focus on building features, not setting up tooling.'
-      }, {
-        icon: 'i-lucide-palette',
-        title: 'Beautiful by default',
-        description: 'Leveraging Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.'
-      }, {
-        icon: 'i-lucide-zap',
-        title: 'Lightning fast',
-        description: 'Optimized for performance with SSR/SSG support, automatic code splitting, and edge-ready deployment. Your users will love the speed.'
-      }, {
-        icon: 'i-lucide-blocks',
-        title: '100+ components included',
-        description: 'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.'
-      }, {
-        icon: 'i-lucide-code-2',
-        title: 'Developer experience first',
-        description: 'Auto-imports, hot module replacement, and TypeScript support. Write less boilerplate and ship more features.'
-      }, {
-        icon: 'i-lucide-shield-check',
-        title: 'Built for scale',
-        description: 'Enterprise-ready architecture with proper error handling, SEO optimization, and security best practices built-in.'
-      }]"
-    />
+      title="Основные модули"
+      description="Быстрый доступ к ключевым разделам системы"
+    >
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+        <UCard
+          v-for="item in modules"
+          :key="item.label"
+          :to="item.status === 'active' ? item.to : undefined"
+          class="relative transition"
+          :class="item.status !== 'active' ? 'opacity-60' : ''"
+        >
+          <UBadge
+            v-if="item.status === 'soon'"
+            color="neutral"
+            variant="solid"
+            class="absolute top-3 right-3"
+          >
+            Скоро
+          </UBadge>
 
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Nuxt app?"
-        description="Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today."
-        variant="subtle"
-        :links="[{
-          label: 'Start building',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          color: 'neutral'
-        }, {
-          label: 'View on GitHub',
-          to: 'https://github.com/nuxt-ui-templates/starter',
-          target: '_blank',
-          icon: 'i-simple-icons-github',
-          color: 'neutral',
-          variant: 'outline'
-        }]"
-      />
+          <UBadge
+            v-if="item.status === 'disabled'"
+            color="error"
+            variant="subtle"
+            class="absolute top-3 right-3"
+          >
+            Недоступно
+          </UBadge>
+
+          <div class="flex items-start gap-4">
+            <UIcon :name="item.icon" class="w-8 h-8 text-primary" />
+            <div>
+              <h3 class="text-lg font-semibold">{{ item.label }}</h3>
+              <p class="text-sm text-muted">{{ item.description }}</p>
+            </div>
+          </div>
+        </UCard>
+
+      </div>
     </UPageSection>
   </div>
 </template>

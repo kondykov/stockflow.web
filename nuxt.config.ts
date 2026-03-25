@@ -2,7 +2,8 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    '@nuxtjs/i18n'
   ],
 
   devtools: {
@@ -17,6 +18,7 @@ export default defineNuxtConfig({
     '/api/identity/**': { proxy: 'http://localhost:8080/api/identity/**' },
     '/api/warehouse/**': { proxy: 'http://localhost:8080/api/warehouse/**' },
   },
+
   future: {
     compatibilityVersion: 4
   },
