@@ -6,7 +6,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Панель управления',
-  description: 'Управление складской системой StockFlow ERP'
+  description: 'Управление складской системой StockFlow WMS'
 })
 
 const modules = [
@@ -58,12 +58,12 @@ const modules = [
 <template>
   <div>
     <UPageHero
-      title="StockFlow ERP"
-      description="Управляйте товарами, складами, запасами и логистикой в единой системе. Простая, быстрая и удобная ERP для малого и среднего бизнеса."
+      title="StockFlow WMS"
+      description="Управляйте товарами, складами, запасами и логистикой в единой системе. Простая, быстрая и удобная WMS для малого и среднего бизнеса."
       :links="[
         {
-          label: 'Перейти к складам',
-          to: '/warehouses',
+          label: 'Перейти в панель управления',
+          to: '/dashboard',
           trailingIcon: 'i-lucide-arrow-right',
           size: 'xl'
         },

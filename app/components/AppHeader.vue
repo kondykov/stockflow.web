@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import authenticated from "~/middleware/authenticated";
-import {useAuth} from "~/composable/auth";
+import { useAuth } from '~/composables/useAuth'
 
 const auth = useAuth()
 
@@ -85,7 +85,7 @@ const items = computed(() => [{
         color="neutral"
         trailing-icon="i-lucide-arrow-right"
         class="hidden lg:inline-flex"
-        to="/account"
+        to="/dashboard/identity/profile"
         v-if="isAuthenticated"
       />
     </template>

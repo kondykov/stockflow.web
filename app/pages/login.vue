@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import * as z from 'zod'
-import {useAuth} from "~/composable/auth";
+import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
   layout: 'auth'
@@ -29,7 +29,7 @@ const fields = [{
 
 const schema = z.object({
   email: z.email('Неверный email'),
-  password: z.string().min(8, 'Необходимо не менее 8 символов')
+  password: z.string()
 })
 
 type Schema = z.output<typeof schema>
@@ -37,12 +37,14 @@ type Schema = z.output<typeof schema>
 const form = ref()
 const pending = ref(false)
 
-async function onSubmit(event: Schema) {
+async function onSubmit(event: any) {
   if (pending.value) return
   pending.value = true
 
+  const data = event.data as Schema
+
   try {
-    await login(event.data)
+    await login(data)
     toast.add({ title: 'Вход выполнен', color: 'success' })
   } catch (err: any) {
     if (err.statusCode === 401) {
@@ -64,6 +66,7 @@ async function onSubmit(event: Schema) {
     :fields="fields"
     :schema="schema"
     title="Вход"
+    :loading="pending"
     :submit="{ label: 'Войти' }"
     @submit="onSubmit"
   >
