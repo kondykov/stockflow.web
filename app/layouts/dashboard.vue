@@ -57,6 +57,24 @@ const navGroups = computed(() => {
           }
         ]
       },
+      {
+        label: 'Каталог',
+        icon: 'i-heroicons-square-3-stack-3d',
+        to: '/dashboard/catalog',
+        onSelect: () => {
+          open.value = false
+        },
+        children: [
+          {
+            label: 'Продукты',
+            to: '/dashboard/catalog/',
+            show: can(Permission.IdentityAccess),
+            onSelect: () => {
+              open.value = false
+            },
+          },
+        ]
+      },
     ],
     [
       {

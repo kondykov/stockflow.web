@@ -1,0 +1,54 @@
+﻿<script setup lang="ts">
+import type { Product } from '~/types/product'
+import ProductForm from "~/components/dashboard/catalog/ProductForm.vue";
+
+definePageMeta({
+  layout: 'dashboard',
+  title: 'Каталог',
+  middleware: 'rbac',
+  permission: 'product.create',
+  breadcrumb: [
+    { label: 'Каталог', to: '/dashboard/catalog' },
+    { label: 'Продукты', to: '/dashboard/catalog/products' },
+    { label: 'Новый продукт' }
+  ]
+})
+
+const formRef = ref()
+const pending = ref(false)
+
+const handleSuccess = async () => {
+  await navigateTo('/dashboard/catalog/products')
+}
+
+const handleCancel = () => {
+  navigateTo('/dashboard/catalog')
+}
+
+const handleSubmit = () => {
+  formRef.value?.submit()
+}
+</script>
+
+<template>
+  <div class="p-6 lg:p-10 max-w-[1400px] mx-auto">
+    <div class="flex justify-end gap-3 mb-8">
+      <UButton label="Отмена" color="neutral" variant="ghost" @click="handleCancel" />
+      <UButton
+        label="Создать товар"
+        color="primary"
+        icon="i-lucide-save"
+        :loading="pending"
+        @click="handleSubmit"
+      />
+    </div>
+
+    <ProductForm
+      ref="formRef"
+      mode="create"
+      form-mode="editable"
+      @success="handleSuccess"
+      @cancel="handleCancel"
+    />
+  </div>
+</template>
