@@ -12,7 +12,7 @@ definePageMeta({
   ]
 })
 
-const toast = useToast()
+const notify = useNotify()
 const { user, roles, fetchRoles } = useAuth()
 
 const isRoleDialogOpen = ref(false)
@@ -30,11 +30,7 @@ onMounted(async () => {
 
 async function handleSaveRoles(selectedRoles: string[]) {
   if (!user.value?.id) {
-    toast.add({
-      title: 'Ошибка',
-      description: 'Пользователь не найден',
-      color: 'red'
-    })
+    notify.error('Ошибка', 'Пользователь не найден')
     return
   }
 
@@ -51,36 +47,12 @@ async function handleSaveRoles(selectedRoles: string[]) {
 
       isRoleDialogOpen.value = false
 
-      toast.add({
-        title: 'Успех',
-        description: 'Роли обновлены',
-        color: 'green'
-      })
+      notify.success('Успешно', 'Роли обновлены')
     } else {
-      if (response.data && typeof response.data === 'object') {
-        const errors = response.data as Record<string, any>
-        Object.entries(errors).forEach(([field, message]) => {
-          const msg = Array.isArray(message) ? message[0] : message
-          toast.add({
-            title: 'Ошибка',
-            description: msg,
-            color: 'red'
-          })
-        })
-      } else {
-        toast.add({
-          title: 'Ошибка',
-          description: response.message || 'Не удалось обновить роли',
-          color: 'red'
-        })
-      }
+      notify.error('Ошибка', notify.extractApiMessage(response as any, 'Не удалось обновить роли'))
     }
   } catch (error: any) {
-    toast.add({
-      title: 'Ошибка',
-      description: error.message || 'Не удалось обновить роли',
-      color: 'red'
-    })
+    notify.error('Ошибка', error?.message || 'Не удалось обновить роли')
   }
 }
 </script>
@@ -105,7 +77,7 @@ async function handleSaveRoles(selectedRoles: string[]) {
 
       <div class="space-y-6 lg:col-span-2">
 
-        <UCard :ui="{ body: { padding: 'p-6' } }">
+        <UCard :ui="{ body: 'p-6' }">
           <template #header>
             <h2 class="text-lg font-semibold">Основная информация</h2>
           </template>
@@ -124,7 +96,7 @@ async function handleSaveRoles(selectedRoles: string[]) {
 
             <div class="space-y-1">
               <p class="text-xs text-gray-500 uppercase tracking-wide">Тип</p>
-              <p class="text-base font-medium">{{ user.type }}</p>
+              <p class="text-base font-medium">{{ user.type || '—' }}</p>
             </div>
 
             <div class="space-y-1">
@@ -144,7 +116,7 @@ async function handleSaveRoles(selectedRoles: string[]) {
 
       <div class="space-y-6">
 
-        <UCard :ui="{ body: { padding: 'p-6' } }">
+        <UCard :ui="{ body: 'p-6' }">
           <template #header>
             <div class="flex items-center justify-between w-full">
               <h2 class="text-lg font-semibold">Роли</h2>

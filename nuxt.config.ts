@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  // ssr: false,
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
@@ -15,8 +16,11 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true },
 
+    '/api/catalog/**': { proxy: 'http://localhost:8080/api/catalog/**' },
     '/api/identity/**': { proxy: 'http://localhost:8080/api/identity/**' },
     '/api/warehouse/**': { proxy: 'http://localhost:8080/api/warehouse/**' },
+
+    '/uploads/**': { proxy: 'http://localhost:8080/uploads/**' }
   },
 
   future: {

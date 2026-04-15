@@ -18,3 +18,15 @@ export type PaginationResponse<T> = {
   hasNextPage: boolean,
   items: T,
 }
+
+/**
+ * Пагинация в формате бэкенда StockFlow (см. PaginatedResponse в PHP)
+ */
+export type PaginatedResponse<TItem> = {
+  page: number
+  perPage: number
+  totalCount: number
+  totalPages: number
+  hasMorePages: boolean
+  items: TItem[]
+}
