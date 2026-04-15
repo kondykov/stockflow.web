@@ -77,21 +77,7 @@ const emit = defineEmits<{
         >
           Открыть
         </UButton>
-        <UButton
-          icon="i-lucide-pen"
-          color="primary"
-          variant="soft"
-          size="sm"
-          class="flex-1"
-          @click="emit('edit', productId)"
-        >
-          Редактировать
-        </UButton>
       </div>
     </slot>
   </div>
 </template>
-
-<style scoped>
-
-</style>

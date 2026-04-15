@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import type { ProductImage } from '~/types/product'
+import type {ProductImage} from '~/types/product'
 
 interface Props {
   images: ProductImage[]
@@ -54,6 +54,15 @@ const handleFileInput = (event: Event) => {
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       <div
+        v-if="mode=='readonly' && images.length < 1"
+      >
+        <div class="aspect-[3/4] rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center text-gray-400">
+          <UIcon name="i-lucide-image" class="w-8 h-8 mb-2" />
+          <span class="text-xs">Нет фотографий</span>
+        </div>
+      </div>
+      <div
+        v-else
         v-for="(img, i) in images"
         :key="i"
         class="relative aspect-[3/4] rounded-xl overflow-hidden group border"
@@ -93,7 +102,7 @@ const handleFileInput = (event: Event) => {
         class="aspect-[3/4] rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center hover:border-primary hover:bg-primary/5 transition-all group"
         @click="fileInput?.click()"
       >
-        <UIcon name="i-lucide-upload" class="w-8 h-8 mb-2 text-gray-400 group-hover:text-primary" />
+        <UIcon name="i-lucide-upload" class="w-8 h-8 mb-2 text-gray-400 group-hover:text-primary"/>
         <span class="text-xs text-gray-500 group-hover:text-primary">Загрузить</span>
         <input
           ref="fileInput"

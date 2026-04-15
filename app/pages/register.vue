@@ -10,7 +10,7 @@ useSeoMeta({
   description: 'Создайте аккаунт в StockFlow ERP'
 })
 
-const toast = useToast()
+const notify = useNotify()
 const pending = ref(false)
 
 const fields = [
@@ -52,42 +52,31 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-async function onSubmit(event: Schema) {
+async function onSubmit(event?: any) {
   if (pending.value) return
   pending.value = true
 
-  console.log(event.data)
+  const payload = (event?.data ?? event) as Schema
 
   try {
-    const response = await $fetch('/api/identity/register', {
+    const response: any = await $fetch('/api/identity/register', {
       method: 'POST',
-      body: event.data
+      body: payload
     })
 
-    if (response.successful) {
-      toast.add({
-        title: 'Аккаунт создан!',
-        description: 'Теперь вы можете войти',
-        color: 'success'
-      })
-
+    if (response?.successful) {
+      notify.success('Аккаунт создан!', 'Теперь вы можете войти')
       return navigateTo('/login')
     }
-  } catch (err: any) {
-    const data = err.data
 
-    if (err.statusCode === 422 && data?.errors) {
-      toast.add({
-        title: 'Ошибка',
-        description: data.errors[0]?.message || 'Некорректные данные',
-        color: 'error'
-      })
+    notify.error('Ошибка регистрации', response?.message || 'Что-то пошло не так')
+  } catch (err: any) {
+    const data = err?.data ?? err?._data
+
+    if (err?.statusCode === 422 && data?.errors) {
+      notify.error('Ошибка', data.errors[0]?.message || 'Некорректные данные')
     } else {
-      toast.add({
-        title: 'Ошибка регистрации',
-        description: data?.message || 'Что-то пошло не так',
-        color: 'error'
-      })
+      notify.error('Ошибка регистрации', data?.message || err?.message || 'Что-то пошло не так')
     }
   } finally {
     pending.value = false

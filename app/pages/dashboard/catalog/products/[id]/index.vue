@@ -1,10 +1,10 @@
 ﻿<script setup lang="ts">
 import type { Product } from '~/types/product'
-import ProductForm from "~/components/dashboard/catalog/ProductForm.vue";
+import ProductForm from '~/components/dashboard/catalog/ProductForm.vue'
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
+const notify = useNotify()
 const { can } = useAuth()
 
 const id = computed(() => parseInt(route.params.id as string))
@@ -13,6 +13,7 @@ definePageMeta({
   layout: 'dashboard',
   title: 'Товар',
   middleware: 'rbac',
+  permission: 'product.view',
   breadcrumb: [
     { label: 'Каталог', to: '/dashboard/catalog' },
     { label: 'Товары', to: '/dashboard/catalog/products' },
@@ -24,49 +25,45 @@ const product = ref<Product | null>(null)
 const loading = ref(true)
 const isEditMode = ref(false)
 const formRef = ref()
-
 const canEdit = computed(() => can('product.edit'))
 
 const fetchProduct = async () => {
   loading.value = true
-  product.value = null
-
   try {
     const response = await useApi<Product>(
       `/api/catalog/product/${id.value}`,
       { method: 'GET' }
     )
 
-    if (!response.successful) {
-      throw new Error(response.message || 'Ошибка загрузки товара')
-    }
-
+    if (!response.successful) throw new Error(response.message || 'Ошибка загрузки товара')
     product.value = response.data as Product
   } catch (error: any) {
-    toast.add({
-      title: 'Ошибка загрузки',
-      description: error.message,
-      icon: 'i-lucide-alert-circle',
-      color: 'error'
-    })
+    notify.error('Ошибка загрузки', error?.message || 'Не удалось загрузить товар')
   } finally {
     loading.value = false
   }
 }
 
-onMounted(async () => {
-  if (!id.value || id.value <= 0) {
-    loading.value = false
-    return
-  }
+// ЭТОТ БЛОК БЫЛ СЛОМАН, ВОТ ИСПРАВЛЕННЫЙ:
+const handleSuccess = (updatedProduct: Product) => {
+  product.value = updatedProduct
+  isEditMode.value = false
+  notify.success('Успешно', 'Товар обновлён')
+}
 
-  await fetchProduct()
+const handleCancel = () => {
+  isEditMode.value = false
+}
+
+onMounted(() => {
+  if (id.value > 0) fetchProduct()
 })
 </script>
 
+
 <template>
   <div class="min-h-screen">
-    <!-- Загрузка - показываем пока loading = true -->
+    <!-- Загрузка -->
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -74,7 +71,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Товар не найден - показываем когда loading = false и product = null -->
+    <!-- Товар не найден -->
     <div v-else-if="!product" class="flex items-center justify-center min-h-[60vh]">
       <UCard class="w-full max-w-md">
         <div class="text-center">
@@ -86,7 +83,7 @@ onMounted(async () => {
       </UCard>
     </div>
 
-    <!-- Содержимое товара - показываем когда loading = false и product != null -->
+    <!-- Содержимое товара -->
     <div v-else class="p-6 lg:p-10 max-w-[1400px] mx-auto">
       <!-- Toolbar -->
       <div class="flex justify-end gap-3 mb-8">
@@ -113,7 +110,7 @@ onMounted(async () => {
             label="Отмена"
             color="neutral"
             variant="soft"
-            @click="isEditMode = false"
+            @click="handleCancel"
           />
           <UButton
             label="Сохранить"
@@ -124,23 +121,14 @@ onMounted(async () => {
         </template>
       </div>
 
-      <!-- Одна форма с динамичным режимом -->
+      <!-- Форма товара -->
       <ProductForm
         ref="formRef"
         mode="edit"
         :form-mode="isEditMode ? 'editable' : 'readonly'"
         :initial-product="product"
-        @success="(updatedProduct) => {
-          product = updatedProduct
-          isEditMode = false
-          toast.add({
-            title: 'Успешно',
-            description: 'Товар обновлён',
-            icon: 'i-lucide-check-circle',
-            color: 'success'
-          })
-        }"
-        @cancel="isEditMode = false"
+        @success="handleSuccess"
+        @cancel="handleCancel"
       />
     </div>
   </div>

@@ -4,10 +4,11 @@
 }
 
 export interface ProductImage {
-  id?: number
+  id?: number | null
   file?: File
   url: string
   isCover: boolean
+  isNew?: boolean
 }
 
 export interface ProductSKU {
@@ -30,7 +31,7 @@ export interface Product {
   skuName: string
   attributes: ProductAttribute[]
   images: Array<{
-    id: number
+    id: number | null
     url: string
     isCover: boolean
   }>

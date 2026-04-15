@@ -1,6 +1,5 @@
 ﻿<script setup lang="ts">
-import type { Product } from '~/types/product'
-import ProductForm from "~/components/dashboard/catalog/ProductForm.vue";
+import ProductForm from '~/components/dashboard/catalog/ProductForm.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -15,7 +14,6 @@ definePageMeta({
 })
 
 const formRef = ref()
-const pending = ref(false)
 
 const handleSuccess = async () => {
   await navigateTo('/dashboard/catalog/products')
@@ -28,6 +26,7 @@ const handleCancel = () => {
 const handleSubmit = () => {
   formRef.value?.submit()
 }
+
 </script>
 
 <template>
@@ -38,7 +37,6 @@ const handleSubmit = () => {
         label="Создать товар"
         color="primary"
         icon="i-lucide-save"
-        :loading="pending"
         @click="handleSubmit"
       />
     </div>

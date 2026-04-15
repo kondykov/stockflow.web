@@ -8,6 +8,10 @@ const {can, isSuperAdmin} = useAuth()
 const route = useRoute()
 const toast = useToast()
 
+useHead({
+  title: () => route.meta.title as string || 'Панель управления'
+})
+
 const open = ref(false)
 
 const navGroups = computed(() => {
@@ -59,15 +63,15 @@ const navGroups = computed(() => {
       },
       {
         label: 'Каталог',
-        icon: 'i-heroicons-square-3-stack-3d',
-        to: '/dashboard/catalog',
+        icon: 'i-heroicons-queue-list',
+        to: '/dashboard/catalog/products',
         onSelect: () => {
           open.value = false
         },
         children: [
           {
-            label: 'Продукты',
-            to: '/dashboard/catalog/',
+            label: 'Добавить продукт',
+            to: '/dashboard/catalog/products/new',
             show: can(Permission.IdentityAccess),
             onSelect: () => {
               open.value = false
@@ -75,6 +79,14 @@ const navGroups = computed(() => {
           },
         ]
       },
+      {
+        label: 'Склады',
+        icon: 'i-heroicons-archive-box',
+        to: '/dashboard/warehouse',
+        onSelect: () => {
+          open.value = false
+        },
+      }
     ],
     [
       {

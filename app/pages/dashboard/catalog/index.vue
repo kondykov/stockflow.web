@@ -3,8 +3,8 @@ definePageMeta({
   layout: 'dashboard',
   title: 'Каталог',
 })
+
+onMounted(() => {
+  navigateTo('/dashboard/catalog/products')
+})
 </script>
-
-<template>
-
-</template>

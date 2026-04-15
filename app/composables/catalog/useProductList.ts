@@ -22,7 +22,7 @@ export function useProductsList(options: UseProductsListOptions = {}) {
 
   const pagination = ref({
     page: 1,
-    perPage: pageSize,
+    pageSize: pageSize,
     totalCount: 0,
     totalPages: 0,
     hasMorePages: false
@@ -37,7 +37,7 @@ export function useProductsList(options: UseProductsListOptions = {}) {
           method: 'GET',
           query: {
             page,
-            perPage: pageSize
+            pageSize: pageSize
           }
         }
       )
@@ -51,7 +51,7 @@ export function useProductsList(options: UseProductsListOptions = {}) {
       products.value = data.items
       pagination.value = {
         page: data.page,
-        perPage: data.perPage,
+        pageSize: data.perPage,
         totalCount: data.totalCount,
         totalPages: data.totalPages,
         hasMorePages: data.hasMorePages

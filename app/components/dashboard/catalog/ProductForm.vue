@@ -1,12 +1,14 @@
 ﻿<script setup lang="ts">
 import type { Product, ProductState } from '~/types/product'
-import ProductGallery from "~/components/dashboard/catalog/ProductGallery.vue"
-import ProductBasicInfo from "~/components/dashboard/catalog/ProductBasicInfo.vue"
-import ProductAttributes from "~/components/dashboard/catalog/ProductAttributes.vue"
-import ProductCard from "~/components/dashboard/catalog/ProductCard.vue"
-import ProductWMSInfo from "~/components/dashboard/catalog/ProductWMSInfo.vue"
+import ProductGallery from '~/components/dashboard/catalog/ProductGallery.vue'
+import ProductBasicInfo from '~/components/dashboard/catalog/ProductBasicInfo.vue'
+import ProductAttributes from '~/components/dashboard/catalog/ProductAttributes.vue'
+import ProductCard from '~/components/dashboard/catalog/ProductCard.vue'
+import ProductWMSInfo from '~/components/dashboard/catalog/ProductWMSInfo.vue'
+import { useProductValidation } from '~/composables/catalog/useProductValidation'
+import { useProductForm } from '~/composables/catalog/useProductForm'
+import { useProductApi } from '~/composables/catalog/useProductApi'
 
-// ✅ Определи интерфейс ДО defineProps
 interface Props {
   mode?: 'create' | 'edit'
   formMode?: 'readonly' | 'editable'
@@ -21,94 +23,78 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   success: [product: Product]
   cancel: []
-  edit: []
 }>()
 
-const toast = useToast()
-const { can } = useAuth()
-
-const { state, onFilesSelected, removeImage, setCoverImage, addAttribute, removeAttribute, reset, getFormData } =
-  useProductForm({
-    isEditMode: props.mode === 'edit',
-    initialProduct: props.initialProduct
-  })
-
+const notify = useNotify()
 const { validate, getFirstErrorMessage } = useProductValidation()
-const { productToState } = useProductConverter()
-const productStatus = useProductStatus(computed(() => state))
+
+// Управление состоянием формы
+const {
+  state,
+  onFilesSelected,
+  removeImage,
+  setCoverImage,
+  addAttribute,
+  removeAttribute,
+  reset,
+  getFormData
+} = useProductForm({
+  isEditMode: props.mode === 'edit',
+  initialProduct: props.initialProduct
+})
+
+// API
+const { createProduct, updateProduct } = useProductApi()
+const isLoading = ref(false)
 
 const isEditable = computed(() => props.formMode === 'editable')
-const canEditProduct = computed(() => can('product.edit'))
 
 const handleAttributeUpdate = (index: number, key: string, value: string) => {
   state.attributes[index] = { key, value }
 }
 
 const handleUpdateState = (updates: Partial<ProductState>) => {
-  Object.assign(state, updates)
+  if ('name' in updates) state.name = updates.name || ''
+  if ('sku' in updates) state.sku = updates.sku!
 }
 
 const onSubmit = async () => {
   if (!isEditable.value) return
 
   const validation = validate(state)
-
   if (!validation.success) {
-    const errorMessage = getFirstErrorMessage(validation)
-    toast.add({
-      title: 'Ошибка валидации',
-      description: errorMessage,
-      icon: 'i-lucide-alert-circle',
-      color: 'error'
-    })
+    notify.error('Ошибка валидации', getFirstErrorMessage(validation))
     return
   }
 
+  isLoading.value = true
   try {
-    const url = props.mode === 'create'
-      ? '/api/catalog/product'
-      : `/api/catalog/product/${props.initialProduct?.id}`
+    const formData = getFormData()
+    let response
 
-    const method = props.mode === 'create' ? 'POST' : 'PUT'
-
-    const response = await useApi<Product>(url, {
-      method,
-      body: getFormData()
-    })
-
-    if (!response.successful) {
-      throw new Error(response.message as string)
+    if (props.mode === 'create') {
+      response = await createProduct(formData)
+    } else {
+      response = await updateProduct(props.initialProduct!.id, formData)
     }
 
-    const product = response.data as Product
+    if (!response.successful) {
+      throw new Error(response.message || 'Ошибка при сохранении')
+    }
+
     const action = props.mode === 'create' ? 'создан' : 'обновлён'
+    notify.success(`Продукт успешно ${action}`, `${state.name} добавлен в каталог`)
 
-    toast.add({
-      title: `Продукт успешно ${action}`,
-      description: `${product.name} добавлен в каталог`,
-      icon: 'i-lucide-check-circle',
-      color: 'success'
-    })
-
-    emit('success', product)
+    emit('success', response.data as Product)
     reset()
   } catch (error: any) {
-    toast.add({
-      title: `Ошибка ${props.mode === 'create' ? 'создания' : 'обновления'}`,
-      description: error.message || 'Не удалось сохранить продукт',
-      icon: 'i-lucide-x-circle',
-      color: 'error'
-    })
+    notify.error(
+      `Ошибка ${props.mode === 'create' ? 'создания' : 'обновления'}`,
+      error?.message || 'Не удалось сохранить продукт'
+    )
+  } finally {
+    isLoading.value = false
   }
-}
-
-const handleCancel = () => {
-  emit('cancel')
-}
-
-const handleEdit = () => {
-  if (!canEditProduct.value) return
-  emit('edit')
 }
 
 defineExpose({
@@ -146,7 +132,6 @@ defineExpose({
 
     <div class="lg:col-span-4 lg:sticky lg:top-10 space-y-6">
       <ProductCard :product="state" />
-      <ProductStatus :status="productStatus" />
       <ProductWMSInfo :product="state" />
     </div>
   </div>
