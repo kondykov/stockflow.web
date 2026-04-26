@@ -1,14 +1,20 @@
 ﻿<script setup lang="ts">
 import WarehouseTable from '~/components/dashboard/warehouse/WarehouseTable.vue'
-import { useWarehousesList } from '~/composables/warehouse/useWarehousesList'
+import {useWarehousesList} from '~/composables/warehouse/useWarehousesList'
+import {Permission} from "~/types/permission";
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'authenticated',
   title: 'Склады',
   breadcrumb: [
-    { label: 'Склады' }
+    {label: 'Склады'}
   ]
+})
+
+const canCreateWarehouse = computed(() => {
+  const {can} = useAuth()
+  return can(Permission.WarehouseCreate)
 })
 
 const notify = useNotify()
@@ -21,7 +27,7 @@ const {
   totalCount,
   fetchWarehouses,
   setSearch
-} = useWarehousesList({ pageSize: 21 })
+} = useWarehousesList({pageSize: 21})
 
 const searchQuery = ref('')
 const errorMessage = ref<string | null>(null)
@@ -105,6 +111,7 @@ const resetSearch = async () => {
         </UButton>
 
         <UButton
+          v-if="canCreateWarehouse"
           color="primary"
           icon="i-lucide-plus"
           to="/dashboard/warehouse/new"
@@ -141,7 +148,7 @@ const resetSearch = async () => {
       </div>
 
       <div v-else-if="!pending && warehouses.length === 0" class="p-10 text-center">
-        <UIcon name="i-lucide-warehouse" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
+        <UIcon name="i-lucide-warehouse" class="w-12 h-12 mx-auto text-gray-300 mb-3"/>
         <div class="text-lg font-semibold">Склады не найдены</div>
         <div class="text-sm text-gray-500 mt-1">Попробуйте изменить запрос или создайте новый склад</div>
 
@@ -149,14 +156,19 @@ const resetSearch = async () => {
           <UButton color="neutral" variant="outline" :disabled="pending" @click="resetSearch">
             Сбросить поиск
           </UButton>
-          <UButton color="primary" to="/dashboard/warehouse/new" icon="i-lucide-plus">
+          <UButton
+            v-if="canCreateWarehouse"
+            color="primary"
+            to="/dashboard/warehouse/new"
+            icon="i-lucide-plus"
+          >
             Создать склад
           </UButton>
         </div>
       </div>
 
       <template v-else>
-        <WarehouseTable :data="warehouses" :loading="pending" @open="onOpen" />
+        <WarehouseTable :data="warehouses" :loading="pending" @open="onOpen"/>
       </template>
 
       <template #footer v-if="totalCount > pageSize">

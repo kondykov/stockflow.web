@@ -1,11 +1,12 @@
 ﻿<script setup lang="ts">
 import ProductForm from '~/components/dashboard/catalog/ProductForm.vue'
+import {Permission} from "~/types/permission";
 
 definePageMeta({
   layout: 'dashboard',
   title: 'Каталог',
   middleware: 'rbac',
-  permission: 'product.create',
+  permission: Permission.ProductCreate,
   breadcrumb: [
     { label: 'Каталог', to: '/dashboard/catalog' },
     { label: 'Продукты', to: '/dashboard/catalog/products' },

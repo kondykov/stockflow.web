@@ -14,7 +14,7 @@ import type {CreateStockMovementPayload} from "~/types/stockMovement";
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'authenticated',
+  middleware: ['authenticated', 'rbac'],
   title: 'Склад',
   breadcrumb: [
     {label: 'Склады', to: '/dashboard/warehouse'},
@@ -37,6 +37,27 @@ const errorMessage = ref<string | null>(null)
 const editMode = ref(false)
 const errors = ref<ValidationError | null>(null)
 const isDeleteOpen = ref(false)
+
+const { can } = useAuth()
+
+const actions = computed(() => {
+  const baseActions = [
+    {
+      label: 'Управление',
+      icon: 'i-lucide-settings',
+      onSelect: openMovementSideover,
+      permission: 'warehouse.stock.movements'
+    },
+    {
+      label: 'Удалить',
+      icon: 'i-lucide-trash',
+      onSelect: handleDeleteStock,
+      permission: 'warehouse.stock.remove'
+    }
+  ]
+
+  return baseActions.filter(action => can(action.permission))
+})
 
 useHead({
   title: () => (warehouse.value?.name ? `Склад: ${warehouse.value.name}` : 'Склад')
@@ -78,11 +99,6 @@ const {
   pending: movementsPending
 } = useStockMovementsWithDetails(warehouseId)
 
-const tabs = [
-  {label: 'Остатки на складе', slot: 'stock'},
-  {label: 'История движений', slot: 'movements'}
-]
-const selectedTab = ref(0)
 
 const showMovementSideover = ref(false)
 const selectedStock = ref<Stock | null>(null)
@@ -327,10 +343,7 @@ onMounted(() => {
             :total-pages="stockTotalPages"
             :current-page="stockPage"
             :page-size="stockPageSize"
-            :actions="[
-              { label: 'Управление', icon: 'i-lucide-settings', onSelect: openMovementSideover },
-              { label: 'Удалить', icon: 'i-lucide-trash', onSelect: handleDeleteStock }
-            ]"
+            :actions="actions"
             @page-change="stockPage = $event; fetchStock()"
           />
         </template>

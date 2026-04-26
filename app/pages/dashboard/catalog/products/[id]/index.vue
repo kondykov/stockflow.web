@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import type { Product } from '~/types/product'
 import ProductForm from '~/components/dashboard/catalog/ProductForm.vue'
+import {Permission} from "~/types/permission";
 
 const route = useRoute()
 const router = useRouter()
@@ -12,8 +13,6 @@ const id = computed(() => parseInt(route.params.id as string))
 definePageMeta({
   layout: 'dashboard',
   title: 'Товар',
-  middleware: 'rbac',
-  permission: 'product.view',
   breadcrumb: [
     { label: 'Каталог', to: '/dashboard/catalog' },
     { label: 'Товары', to: '/dashboard/catalog/products' },
@@ -25,7 +24,7 @@ const product = ref<Product | null>(null)
 const loading = ref(true)
 const isEditMode = ref(false)
 const formRef = ref()
-const canEdit = computed(() => can('product.edit'))
+const canEdit = computed(() => can(Permission.ProductEdit))
 
 const fetchProduct = async () => {
   loading.value = true
