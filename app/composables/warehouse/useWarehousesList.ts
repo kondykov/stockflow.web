@@ -1,7 +1,7 @@
-﻿import { computed, ref } from 'vue'
-import type { PaginatedResponse } from '~/types/apiResponse'
-import type { Warehouse } from '~/types/warehouse'
-import { useWarehouseApi } from '~/composables/warehouse/useWarehouseApi'
+﻿import {computed, ref} from 'vue'
+import type {PaginationResponse} from '~/types/apiResponse'
+import type {Warehouse} from '~/types/warehouse'
+import {useWarehouseApi} from '~/composables/warehouse/useWarehouseApi'
 
 export function useWarehousesList(options: { pageSize?: number } = {}) {
   const api = useWarehouseApi()
@@ -28,9 +28,9 @@ export function useWarehousesList(options: { pageSize?: number } = {}) {
         throw new Error(response.message || 'Не удалось загрузить склады')
       }
 
-      const data = response.data as PaginatedResponse<Warehouse>
+      const data = response.data as PaginationResponse<Warehouse[]>
 
-      warehouses.value = data.items || []
+      warehouses.value = data.items as Warehouse[] || []
       totalCount.value = data.totalCount || 0
       totalPages.value = data.totalPages || 0
     } finally {
@@ -45,7 +45,6 @@ export function useWarehousesList(options: { pageSize?: number } = {}) {
   }
 
   return {
-    // state
     page,
     pageSize,
     search: computed(() => search.value),
@@ -55,7 +54,6 @@ export function useWarehousesList(options: { pageSize?: number } = {}) {
     totalCount: computed(() => totalCount.value),
     totalPages: computed(() => totalPages.value),
 
-    // actions
     fetchWarehouses,
     setSearch
   }

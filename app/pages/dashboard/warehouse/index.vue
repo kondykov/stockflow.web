@@ -21,7 +21,7 @@ const {
   totalCount,
   fetchWarehouses,
   setSearch
-} = useWarehousesList({ pageSize: 20 })
+} = useWarehousesList({ pageSize: 21 })
 
 const searchQuery = ref('')
 const errorMessage = ref<string | null>(null)

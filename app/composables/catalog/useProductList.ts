@@ -1,5 +1,5 @@
-﻿import { ref, computed } from 'vue'
-import type { Product } from '~/types/product'
+﻿import {computed, ref} from 'vue'
+import type {Product} from '~/types/product'
 
 interface PaginationData {
   page: number
@@ -102,7 +102,7 @@ export function useProductsList(options: UseProductsListOptions = {}) {
   return {
     products: computed(() => products.value),
     pagination: computed(() => pagination.value),
-    currentPage: computed(() => currentPage.value),
+    currentPage: currentPage,
     loading: computed(() => loading.value),
     fetchProducts,
     goToPage,

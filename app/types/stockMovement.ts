@@ -1,4 +1,4 @@
-﻿export type StockMovementType = 'incoming' | 'outgoing' | 'adjustment'
+﻿export type StockMovementType = 'incoming' | 'outgoing' | 'adjustment' | 'transfer'
 
 export type StockMovement = {
   id: number
@@ -10,10 +10,11 @@ export type StockMovement = {
   createdAt: string
 }
 
-export type CreateStockMovementPayload = {
+export interface CreateStockMovementPayload {
   warehouseId: number
   stockItemId: number
   type: StockMovementType
   qty: number
-  reason?: string | null
+  toWarehouseId?: number | null
+  reason?: string
 }

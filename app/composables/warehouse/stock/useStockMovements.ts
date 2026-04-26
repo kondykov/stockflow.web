@@ -1,49 +1,28 @@
 ﻿import type { StockMovement } from '~/types/stockMovement'
-import type { PaginatedResponse } from '~/types/apiResponse'
-import { useStockApi } from '~/composables/warehouse/stock/useStockApi'
+import type { PaginationResponse } from '~/types/apiResponse'
+import {useStockApi} from "~/composables/warehouse/stock/useStockApi";
 
-export function useStockMovements(warehouseId: number, pageSize = 20) {
+export function useStockMovements(warehouseId: Ref<number>) {
   const api = useStockApi()
-
   const page = ref(1)
+  const items = ref<StockMovement[]>([])
   const pending = ref(false)
-  const errorMessage = ref<string | null>(null)
-  const movements = ref<StockMovement[]>([])
-  const totalCount = ref(0)
 
   const fetchMovements = async () => {
     pending.value = true
-    errorMessage.value = null
-
     try {
-      const res = await api.getMovements(warehouseId, { page: page.value, pageSize })
-      if (!res.successful) {
-        throw new Error(res.message || 'Не удалось загрузить движения')
+      const response = await api.getMovements(warehouseId.value, { page: page.value })
+      if (response.successful) {
+        const data = response.data as PaginationResponse<StockMovement[]>
+        items.value = data.items ?? []
       }
-
-      const paginationData = res.data as PaginatedResponse<StockMovement>
-
-      movements.value = paginationData.items
-      totalCount.value = paginationData.totalCount
-    } catch (e: any) {
-      errorMessage.value = e?.message || 'Не удалось загрузить движения'
-      throw e
     } finally {
       pending.value = false
     }
   }
 
-  watch(page, () => {
-    fetchMovements().catch(() => {})
-  })
+  watch(page, () => fetchMovements())
+  watch(warehouseId, () => { page.value = 1; fetchMovements() })
 
-  return {
-    page,
-    pageSize,
-    movements,
-    pending,
-    errorMessage,
-    totalCount,
-    fetchMovements
-  }
+  return { items, pending, page, fetchMovements }
 }

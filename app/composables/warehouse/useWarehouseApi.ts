@@ -1,5 +1,5 @@
-﻿import type { ApiResponse, PaginatedResponse } from '~/types/apiResponse'
-import type { CreateWarehousePayload, UpdateWarehousePayload, Warehouse } from '~/types/warehouse'
+﻿import type {ApiResponse, PaginationResponse} from '~/types/apiResponse'
+import type {CreateWarehousePayload, UpdateWarehousePayload, Warehouse} from '~/types/warehouse'
 
 export function useWarehouseApi() {
   const createWarehouse = (payload: CreateWarehousePayload): Promise<ApiResponse<Warehouse>> => {
@@ -33,18 +33,17 @@ export function useWarehouseApi() {
     pageSize?: number
     perPage?: number
     search?: string
-  } = {}): Promise<ApiResponse<PaginatedResponse<Warehouse>>> => {
+  } = {}): Promise<ApiResponse<PaginationResponse<Warehouse[]>>> => {
     const page = params.page ?? 1
     const pageSize = params.pageSize ?? params.perPage ?? 20
 
-    return useApi<PaginatedResponse<Warehouse>>('/api/warehouse/', {
+    return useApi<PaginationResponse<Warehouse[]>>('/api/warehouse/', {
       method: 'GET',
       query: {
         page,
-        // Поддерживаем оба имени параметра, т.к. на бэке могут ожидать pageSize или perPage
         pageSize,
         perPage: pageSize,
-        ...(params.search ? { search: params.search } : {})
+        ...(params.search ? {search: params.search} : {})
       }
     })
   }

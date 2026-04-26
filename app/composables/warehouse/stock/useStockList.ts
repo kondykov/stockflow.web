@@ -1,25 +1,37 @@
-﻿import { useStockApi } from '~/composables/warehouse/stock/useStockApi'
+﻿import { ref, computed, watch, type Ref } from 'vue'
+import { useStockApi } from '~/composables/warehouse/stock/useStockApi'
 import type { Stock } from '~/types/stock'
+import type { PaginationResponse } from '~/types/apiResponse'
 
-export function useStockList(warehouseId: number) {
+export function useStockList(warehouseId: Ref<number>, options: { pageSize?: number } = {}) {
   const api = useStockApi()
 
+  const pageSize = options.pageSize ?? 20
+  const page = ref(1)
+  const search = ref('')
   const pending = ref(false)
   const errorMessage = ref<string | null>(null)
+
   const items = ref<Stock[]>([])
+  const totalCount = ref(0)
+  const totalPages = ref(0)
 
   const fetchStock = async () => {
     pending.value = true
     errorMessage.value = null
 
     try {
-      const res = await api.getStock(warehouseId)
+      const response = await api.getStock(warehouseId.value, page.value, pageSize, search.value)
 
-      if (!res.successful) {
-        throw new Error(res.message || 'Не удалось загрузить остатки')
+      if (!response.successful) {
+        throw new Error(response.message || 'Не удалось загрузить остатки')
       }
 
-      items.value = res.data
+      const data = response.data as PaginationResponse<Stock[]>
+
+      items.value = data.items ?? []
+      totalCount.value = data.totalCount ?? 0
+      totalPages.value = data.totalPages ?? 0
     } catch (e: any) {
       errorMessage.value = e.message || 'Не удалось загрузить остатки'
       throw e
@@ -28,10 +40,24 @@ export function useStockList(warehouseId: number) {
     }
   }
 
+  const setSearch = async (value: string) => {
+    search.value = value
+    page.value = 1
+    await fetchStock()
+  }
+
+  watch(warehouseId, () => fetchStock())
+
   return {
+    page,
+    pageSize,
+    search,
     items,
     pending,
     errorMessage,
-    fetchStock
+    totalCount,
+    totalPages,
+    fetchStock,
+    setSearch
   }
 }

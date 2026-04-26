@@ -16,8 +16,15 @@ export function useProductApi() {
     })
   }
 
+  const getProduct = (id: number): Promise<ApiResponse<Product>> => {
+    return useApi<Product>(`/api/catalog/product/${id}`, {
+      method: 'GET'
+    })
+  }
+
   return {
     createProduct,
-    updateProduct
+    updateProduct,
+    getProduct,
   }
 }

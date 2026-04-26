@@ -2,10 +2,12 @@
 import WarehouseForm from '~/components/dashboard/warehouse/WarehouseForm.vue'
 import type { ValidationError } from '~/types/apiResponse'
 import { useWarehouseApi } from '~/composables/warehouse/useWarehouseApi'
+import {Permission} from "~/types/permission";
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'authenticated',
+  middleware: ['authenticated', 'rbac'],
+  permission: Permission.WarehouseCreate,
   title: 'Новый склад',
   breadcrumb: [
     { label: 'Склады', to: '/dashboard/warehouse' },

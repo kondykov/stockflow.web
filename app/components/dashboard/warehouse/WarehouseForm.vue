@@ -55,11 +55,11 @@ const onSubmit = () => {
 <template>
   <UForm :state="state" @submit.prevent="onSubmit" class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <UFormGroup label="Название" name="name" required :error="fieldError('name')">
+      <UFieldGroup label="Название" name="name" required :error="fieldError('name')">
         <UInput v-model="state.name" placeholder="Например: Основной склад" :disabled="pending" />
-      </UFormGroup>
+      </UFieldGroup>
 
-      <UFormGroup
+      <UFieldGroup
         label="Адрес"
         name="address"
         required
@@ -67,7 +67,7 @@ const onSubmit = () => {
         class="md:col-span-2"
       >
         <UInput v-model="state.address" placeholder="Город, улица, дом" :disabled="pending" />
-      </UFormGroup>
+      </UFieldGroup>
     </div>
 
     <div class="flex items-center justify-end gap-2">

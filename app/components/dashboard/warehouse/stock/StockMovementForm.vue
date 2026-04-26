@@ -1,5 +1,7 @@
 ﻿<script setup lang="ts">
-import type { CreateStockMovementPayload, StockMovementType } from '~/types/stockMovement'
+import type { StockMovementType } from '~/types/stockMovement'
+import type { Stock } from '~/types/stock'
+import { useStockApi } from '~/composables/warehouse/stock/useStockApi'
 
 const props = defineProps<{
   warehouseId: number
@@ -8,40 +10,69 @@ const props = defineProps<{
   pending?: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'submit', payload: CreateStockMovementPayload): void
-  (e: 'cancel'): void
-}>()
+const emit = defineEmits(['submit', 'cancel'])
+const stockApi = useStockApi()
 
-const form = reactive<CreateStockMovementPayload>({
+const { data: stockResponse } = await useAsyncData('stocks-list', () =>
+  stockApi.getStock(props.warehouseId, 1, 100)
+)
+
+const stockOptions = computed(() => {
+  const items = stockResponse.value?.data?.items || []
+
+  const options = items
+    .filter((s: Stock) => s.stockItemId !== props.stockItemId)
+    .map((s: Stock) => ({
+      label: `${s.skuName} (${s.skuCode}) - остаток: ${s.onHand}`,
+      value: s.stockItemId
+    }))
+
+  return options
+})
+
+const form = reactive({
   warehouseId: props.warehouseId,
   stockItemId: props.stockItemId,
   type: props.type,
-  qty: 0,
+  quantity: 1,
+  toWarehouseId: null as number | null,
   reason: ''
 })
 
-const onSubmit = () => {
-  emit('submit', { ...form })
-}
+const onSubmit = () => emit('submit', {...form})
 </script>
 
 <template>
-  <UForm @submit="onSubmit">
-    <UFormGroup label="Количество" required>
-      <UInput v-model.number="form.qty" type="number" />
-    </UFormGroup>
+  <UForm :state="form" @submit="onSubmit" class="space-y-4">
+    <UFieldGroup
+      v-if="type === 'transfer'"
+      label="Переместить в:"
+      name="toWarehouseId"
+      required
+    >
+      <USelectMenu
+        v-model="form.toWarehouseId"
+        :options="stockOptions"
+        value-attribute="value"
+        placeholder="Выберите целевой сток"
+        searchable
+      />
+    </UFieldGroup>
 
-    <UFormGroup label="Причина">
-      <UInput v-model="form.reason" />
-    </UFormGroup>
+    <UFieldGroup label="Количество" name="quantity" required>
+      <UInput v-model.number="form.quantity" type="number" min="1" size="lg" />
+    </UFieldGroup>
 
-    <div class="flex justify-end gap-2 mt-4">
-      <UButton color="neutral" variant="ghost" type="button" :disabled="pending" @click="emit('cancel')">
-        Отмена
+    <UFieldGroup label="Причина (опционально)" name="reason">
+      <UTextarea v-model="form.reason" placeholder="Комментарий к операции..." />
+    </UFieldGroup>
+
+    <div class="flex flex-col gap-2 pt-4">
+      <UButton type="submit" color="primary" block size="lg" :loading="pending">
+        {{ type === 'transfer' ? 'Подтвердить перемещение' : 'Сохранить' }}
       </UButton>
-      <UButton color="primary" type="submit" :loading="pending">
-        Сохранить
+      <UButton variant="ghost" color="neutral" block @click="emit('cancel')">
+        Отмена
       </UButton>
     </div>
   </UForm>

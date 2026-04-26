@@ -1,58 +1,38 @@
 ﻿<script setup lang="ts">
-import type { Row } from '@tanstack/vue-table'
-import type { Stock } from '~/types/stock'
-import { UButton, UDropdownMenu } from '#components'
+import type {StockMovement, StockMovementType} from '~/types/stockMovement'
 
-interface Action {
-  label: string
-  icon: string
-  onSelect: (stock: Stock) => void
+interface EnrichedMovement extends StockMovement {
+  skuCode?: string
+  skuName?: string
 }
 
 const props = defineProps<{
-  data: Stock[]
+  data: EnrichedMovement[]
   loading?: boolean
   totalCount?: number
   totalPages?: number
   currentPage?: number
-  pageSize?: number
-  actions?: Action[]
 }>()
 
 const emit = defineEmits<{
   'page-change': [page: number]
-  'delete': [stockItemId: number]
 }>()
 
-const columns = computed(() => {
-  const cols = [
-    { accessorKey: 'skuCode', header: 'Артикул' },
-    { accessorKey: 'skuName', header: 'Название' },
-    { accessorKey: 'onHand', header: 'Остаток' }
-  ]
+const movementTypeLabels: Record<string, string> = {
+  incoming: 'Приход',
+  outgoing: 'Расход',
+  adjustment: 'Коррекция',
+  transfer: 'Перемещение'
+}
 
-  if (props.actions && props.actions.length > 0) {
-    cols.push({
-      accessorKey: 'actions',
-      header: 'Действия',
-      cell: ({ row }: { row: Row<Stock> }) => {
-        const items = props.actions!.map(a => ({
-          label: a.label,
-          icon: a.icon,
-          onSelect: () => a.onSelect(row.original)
-        }))
-
-        return h(
-          UDropdownMenu,
-          { items, content: { align: 'end' } },
-          () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', variant: 'ghost' })
-        )
-      }
-    })
-  }
-
-  return cols
-})
+const columns = [
+  { accessorKey: 'skuCode', header: 'SKU' },
+  { accessorKey: 'skuName', header: 'Товар' },
+  { accessorKey: 'type', header: 'Тип' },
+  { accessorKey: 'qty', header: 'Кол-во' },
+  { accessorKey: 'reason', header: 'Причина' },
+  { accessorKey: 'createdAt', header: 'Дата' }
+]
 
 const goToPage = (page: number) => {
   emit('page-change', page)
@@ -61,7 +41,13 @@ const goToPage = (page: number) => {
 
 <template>
   <div class="space-y-4">
-    <UTable :data="data" :columns="columns" :loading="loading" />
+    <UTable :rows="data" :columns="columns" :loading="loading">
+      <template #type-data="{ row }">
+        <UBadge>
+          {{ movementTypeLabels[row.original.type as StockMovementType] || row.original.type }}
+        </UBadge>
+      </template>
+    </UTable>
 
     <div v-if="totalPages && totalPages > 1" class="flex items-center justify-between">
       <div class="text-sm text-gray-500">
@@ -69,7 +55,7 @@ const goToPage = (page: number) => {
       </div>
       <div class="flex gap-2">
         <UButton
-          icon="i-lucide-chevron-left"
+          icon="i-heroicons-chevron-left-20-solid"
           color="neutral"
           variant="ghost"
           :disabled="currentPage === 1"
@@ -87,7 +73,7 @@ const goToPage = (page: number) => {
           />
         </div>
         <UButton
-          icon="i-lucide-chevron-right"
+          icon="i-heroicons-chevron-right-20-solid"
           color="neutral"
           variant="ghost"
           :disabled="currentPage === totalPages"

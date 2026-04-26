@@ -7,4 +7,6 @@
   ProductCreate = 'product.create',
   ProductEdit = 'product.edit',
   ProductDelete = 'product.delete',
+
+  WarehouseCreate = 'warehouse.create'
 }

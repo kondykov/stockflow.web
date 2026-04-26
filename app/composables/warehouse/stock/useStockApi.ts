@@ -1,63 +1,49 @@
-﻿import type { ApiResponse, PaginatedResponse } from '~/types/apiResponse'
-import type { Stock } from '~/types/stock'
-import type {
-  StockMovement,
-  CreateStockMovementPayload
-} from '~/types/stockMovement'
+﻿import type {PaginationResponse} from '~/types/apiResponse'
+import type {Stock} from '~/types/stock'
+import type {CreateStockMovementPayload, StockMovement, StockMovementType} from '~/types/stockMovement'
 
 export function useStockApi() {
-  const getStock = (warehouseId: number) =>
-    useApi<PaginatedResponse<Stock[]>>(`/api/warehouse/${warehouseId}/stock`, {
-      method: 'GET'
+  const getStock = (warehouseId: number, page = 1, pageSize = 20, search = '') =>
+    useApi<PaginationResponse<Stock[]>>(`/api/warehouse/${warehouseId}/stock`, {
+      method: 'GET', query: {page, pageSize, search}
     })
 
-  const getMovements = (
-    warehouseId: number,
-    params: {
-      page?: number
-      pageSize?: number
-      perPage?: number
-    } = {}
-  ) => {
-    const page = params.page ?? 1
-    const pageSize = params.pageSize ?? params.perPage ?? 20
+  const getMovements = (warehouseId: number, params: { page?: number } = {}) =>
+    useApi<PaginationResponse<StockMovement[]>>(`/api/warehouse/${warehouseId}/stock/movements`, {
+      method: 'GET', query: {page: params.page ?? 1, pageSize: 20}
+    })
 
-    return useApi<PaginatedResponse<StockMovement>>(
-      `/api/warehouse/${warehouseId}/stock/movements`,
-      {
-        method: 'GET',
-        query: {
-          page,
-          pageSize,
-          perPage: pageSize
-        }
-      }
-    )
+  const incoming = (wId: number, body: CreateStockMovementPayload) => useApi<Stock>(`/api/warehouse/${wId}/stock/incoming`, {
+    method: 'POST',
+    body
+  })
+  const outgoing = (wId: number, body: CreateStockMovementPayload) => useApi<Stock>(`/api/warehouse/${wId}/stock/outgoing`, {
+    method: 'PATCH',
+    body
+  })
+  const adjustment = (wId: number, body: CreateStockMovementPayload) => useApi<Stock>(`/api/warehouse/${wId}/stock/adjust`, {
+    method: 'PATCH',
+    body
+  })
+  const transfer = (wId: number, body: CreateStockMovementPayload) => useApi<Stock>(`/api/warehouse/${wId}/stock/transfer`, {
+    method: 'POST',
+    body
+  })
+
+  const sendMovement = (warehouseId: number, payload: CreateStockMovementPayload) => {
+    const actions: Record<StockMovementType, Function> = {incoming, outgoing, adjustment, transfer}
+    return actions[payload.type](warehouseId, payload)
   }
 
-  const incoming = (payload: CreateStockMovementPayload) =>
-    useApi<StockMovement>('/api/warehouse/stock/incoming', {
-      method: 'POST',
-      body: payload
-    })
-
-  const outgoing = (payload: CreateStockMovementPayload) =>
-    useApi<StockMovement>('/api/warehouse/stock/outgoing', {
-      method: 'POST',
-      body: payload
-    })
-
-  const adjust = (payload: CreateStockMovementPayload) =>
-    useApi<StockMovement>('/api/warehouse/stock/adjustment', {
-      method: 'POST',
-      body: payload
+  const deleteStock = (warehouseId: number, stockItemId: number) =>
+    useApi(`/api/warehouse/${warehouseId}/stock/${stockItemId}`, {
+      method: 'DELETE'
     })
 
   return {
     getStock,
+    deleteStock,
     getMovements,
-    incoming,
-    outgoing,
-    adjust
+    sendMovement,
   }
 }

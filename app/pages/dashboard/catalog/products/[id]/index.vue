@@ -44,7 +44,6 @@ const fetchProduct = async () => {
   }
 }
 
-// ЭТОТ БЛОК БЫЛ СЛОМАН, ВОТ ИСПРАВЛЕННЫЙ:
 const handleSuccess = (updatedProduct: Product) => {
   product.value = updatedProduct
   isEditMode.value = false
@@ -63,7 +62,6 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen">
-    <!-- Загрузка -->
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -71,7 +69,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Товар не найден -->
     <div v-else-if="!product" class="flex items-center justify-center min-h-[60vh]">
       <UCard class="w-full max-w-md">
         <div class="text-center">
@@ -83,9 +80,7 @@ onMounted(() => {
       </UCard>
     </div>
 
-    <!-- Содержимое товара -->
     <div v-else class="p-6 lg:p-10 max-w-[1400px] mx-auto">
-      <!-- Toolbar -->
       <div class="flex justify-end gap-3 mb-8">
         <UButton
           label="Назад"
@@ -95,7 +90,6 @@ onMounted(() => {
           @click="isEditMode ? isEditMode = false : router.back()"
         />
 
-        <!-- Режим просмотра -->
         <UButton
           v-if="!isEditMode && canEdit"
           label="Редактировать"
@@ -104,7 +98,6 @@ onMounted(() => {
           @click="isEditMode = true"
         />
 
-        <!-- Режим редактирования -->
         <template v-else-if="isEditMode">
           <UButton
             label="Отмена"
@@ -121,7 +114,6 @@ onMounted(() => {
         </template>
       </div>
 
-      <!-- Форма товара -->
       <ProductForm
         ref="formRef"
         mode="edit"
