@@ -1,10 +1,11 @@
-﻿FROM node:20-alpine AS build
+﻿FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npx nuxi generate
 
 FROM alpine:latest
-COPY --from=build /app/dist /dist
-CMD ["sleep", "infinity"]
+WORKDIR /var/www/frontend
+COPY --from=builder /app/.output/public .
+CMD ["sh"]
