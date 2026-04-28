@@ -360,16 +360,16 @@ onMounted(() => {
         </template>
       </UCard>
 
-      <UCard class="mt-6">
-        <template #header>
-          <div class="font-semibold">История движений</div>
-        </template>
+<!--      <UCard class="mt-6">-->
+<!--        <template #header>-->
+<!--          <div class="font-semibold">История движений</div>-->
+<!--        </template>-->
 
-        <StockMovementsTable
-          :data="movements"
-          :loading="movementsPending"
-        />
-      </UCard>
+<!--        <StockMovementsTable-->
+<!--          :data="movements"-->
+<!--          :loading="movementsPending"-->
+<!--        />-->
+<!--      </UCard>-->
 
       <StockSideover
         v-model:isOpen="showMovementSideover"

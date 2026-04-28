@@ -3,9 +3,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npx nuxi generate
+RUN NODE_OPTIONS="--max-old-space-size=1536" npx nuxi generate
 
 FROM alpine:latest
-WORKDIR /var/www/frontend
-COPY --from=builder /app/.output/public .
-CMD ["sh"]
+RUN mkdir -p /var/www/frontend
+COPY --from=builder /app/.output/public/ /var/www/frontend/
+RUN ls -la /var/www/frontend

@@ -4,7 +4,7 @@ import TeamsMenu from "~/components/dashboard/TeamsMenu.vue";
 import UserMenu from "~/components/dashboard/UserMenu.vue";
 import {Permission} from "~/types/permission";
 
-const {can, isSuperAdmin} = useAuth()
+const {can} = useAuth()
 const route = useRoute()
 const toast = useToast()
 
@@ -88,20 +88,20 @@ const navGroups = computed(() => {
         },
       }
     ],
-    [
-      {
-        label: 'Feedback',
-        icon: 'i-lucide-message-circle',
-        to: 'https://github.com/nuxt-ui-templates/dashboard',
-        target: '_blank'
-      },
-      {
-        label: 'Help & Support',
-        icon: 'i-lucide-info',
-        to: 'https://github.com/nuxt-ui-templates/dashboard',
-        target: '_blank'
-      }
-    ]
+    // [
+    //   {
+    //     label: 'Feedback',
+    //     icon: 'i-lucide-message-circle',
+    //     to: 'https://github.com/nuxt-ui-templates/dashboard',
+    //     target: '_blank'
+    //   },
+    //   {
+    //     label: 'Help & Support',
+    //     icon: 'i-lucide-info',
+    //     to: 'https://github.com/nuxt-ui-templates/dashboard',
+    //     target: '_blank'
+    //   }
+    // ]
   ]
 
   const filterLinks = (items: any[]): any[] => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'authenticated',
+  // middleware: 'authenticated',
   layout: 'default'
 })
 
@@ -36,21 +36,21 @@ const modules = [
     description: 'Внутренние перемещения между складами',
     icon: 'i-lucide-arrow-left-right',
     to: '/transfers',
-    status: 'soon'
+    status: 'active'
   },
   {
     label: 'Поставки',
     description: 'Приёмка товаров от поставщиков',
     icon: 'i-lucide-truck',
     to: '/supplies',
-    status: 'soon'
+    status: 'active'
   },
   {
     label: 'Отгрузки',
     description: 'Отправка товаров клиентам',
     icon: 'i-lucide-package-check',
     to: '/shipments',
-    status: 'disabled'
+    status: 'active'
   }
 ]
 </script>
@@ -69,7 +69,7 @@ const modules = [
         },
         {
           label: 'Документация',
-          to: '/docs',
+          to: 'https://docs-template.nuxt.dev/',
           icon: 'i-lucide-book-open',
           size: 'xl',
           color: 'neutral',
