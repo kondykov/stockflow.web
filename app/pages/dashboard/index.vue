@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  // middleware: 'authenticated',
+  middleware: 'authenticated',
   title: 'Главная'
 })
 
